@@ -55,26 +55,6 @@ namespace Frida {
 
 			unowned Gum.InvocationListener listener = this;
 
-#if ANDROID
-			if (get_executable_path ().has_prefix ("/system/bin/app_process")) {
-				try {
-					string cmdline;
-					FileUtils.get_contents ("/proc/self/cmdline", out cmdline);
-					if (cmdline == "zygote" || cmdline == "zygote64" || cmdline == "usap32" || cmdline == "usap64") {
-						var set_argv0 = Gum.Module.find_export_by_name ("libandroid_runtime.so", "_Z27android_os_Process_setArgV0P7_JNIEnvP8_jobjectP8_jstring");
-						if (set_argv0 != null) {
-							interceptor.attach (set_argv0, listener, (void *) HookId.SET_ARGV0);
-							child_recovery_behavior = DEFERRED_UNTIL_SET_ARGV0;
-						}
-
-						var setcontext = Gum.Module.find_export_by_name ("libselinux.so", "selinux_android_setcontext");
-						if (setcontext != null)
-							interceptor.attach (setcontext, listener, (void *) HookId.SET_CTX);
-					}
-				} catch (FileError e) {
-				}
-			}
-#endif
 
 			interceptor.attach (fork_impl, listener, (void *) HookId.FORK);
 			interceptor.replace (vfork_impl, fork_impl);

@@ -405,25 +405,6 @@ namespace Frida.Gadget {
 			);
 		}
 
-#if ANDROID
-		construct {
-			if (executable_name.has_prefix ("app_process")) {
-				try {
-					string cmdline;
-					FileUtils.get_contents ("/proc/self/cmdline", out cmdline);
-					if (cmdline != "zygote" && cmdline != "zygote64") {
-						executable_name = cmdline;
-
-						cached_bundle_id = cmdline.split (":", 2)[0];
-						cached_bundle_name = cached_bundle_id;
-						did_fetch_bundle_id = true;
-						did_fetch_bundle_name = true;
-					}
-				} catch (FileError e) {
-				}
-			}
-		}
-#endif
 
 		public string resolve_asset_path (string asset_path) {
 			if (!Path.is_absolute (asset_path)) {
